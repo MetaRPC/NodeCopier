@@ -29,13 +29,12 @@ async function main() {
     console.log(`Created accounts: Master=${master.login}, Slave=${slave.login}`);
 
     // 2. Initialize Copier Service
-    const copier = new CopierService('https://copy.mrpc.pro:443', { userKey: 'YOUR_USER_KEY', managerKey: 'YOUR_MANAGER_KEY' });
+    const copier = new CopierService('https://copy.mrpc.pro:443', { userKey: 'YOUR_USER_KEY' });
 
     // 3. Start Copier
     const startRes = await copier.start({
         userKey: 'YOUR_USER_KEY',
-        managerKey: 'YOUR_MANAGER_KEY',
-        master: { type: 'MT5', user: master.login, password: master.password, server: master.server },
+            master: { type: 'MT5', user: master.login, password: master.password, server: master.server },
         slave: { type: 'MT5', user: slave.login, password: slave.password, server: slave.server },
         riskType: 'LotMultiplier',
         riskValue: '1.5',
