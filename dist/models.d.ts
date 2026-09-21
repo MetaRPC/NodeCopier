@@ -4,6 +4,7 @@ export interface Account {
     password: string;
     server: string;
     name?: string;
+    id?: string;
 }
 export interface StartRequest {
     userKey: string;

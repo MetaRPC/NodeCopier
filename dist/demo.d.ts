@@ -30,4 +30,8 @@ export declare class DemoAccountClient {
     openDemoAccount(params: OpenDemoAccountParams, apiKey?: string): Promise<DemoAccountResult>;
     connectEx(user: number, password: string, server?: string, apiKey?: string): Promise<ConnectExResult>;
     disconnect(terminalId: string, apiKey?: string): Promise<DisconnectResult>;
+    orderSend(terminalId: string, symbol: string, operation: string, volume: number, apiKey?: string): Promise<any>;
+    openedOrders(terminalId: string, apiKey?: string): Promise<any[]>;
+    orderClose(terminalId: string, ticket: number, apiKey?: string): Promise<any>;
 }
+export declare function toHyphenGuid(guid: string): string;

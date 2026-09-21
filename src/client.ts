@@ -57,7 +57,7 @@ export class CopierService {
 
         return new Promise<StartReply>((resolve) => {
             const meta = this.getMetadata();
-            const deadline = new Date(Date.now() + 15000);
+            const deadline = new Date(Date.now() + 60000);
             this.grpcClient.start(request, meta, { deadline }, (err: any, response: any) => {
                 if (err) {
                     return resolve({
