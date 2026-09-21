@@ -47,8 +47,9 @@ class CopierService {
     endpoint;
     grpcClient;
     constructor(endpoint = 'copy.mrpc.pro:443', options) {
+        const userKey = typeof options === 'string' ? options : options.userKey;
         this.endpoint = endpoint;
-        this.account = new account_1.CopierAccount(endpoint, options.userKey, options.managerKey);
+        this.account = new account_1.CopierAccount(endpoint, userKey);
         const cleanEndpoint = endpoint.replace(/^https?:\/\//, '').replace(/^wss?:\/\//, '');
         const credentials = (cleanEndpoint.includes(':443') || cleanEndpoint.endsWith('443') || !cleanEndpoint.includes(':'))
             ? grpc.credentials.createSsl()
@@ -67,16 +68,14 @@ class CopierService {
     getMetadata() {
         const meta = new grpc.Metadata();
         meta.set('authorization', `Bearer ${this.account.userKey}`);
-        if (this.account.managerKey) {
-            meta.set('x-metarpc-manager', this.account.managerKey);
-        }
         meta.set('x-metarpc-client-sdk', 'NodeCopier/1.0.0');
         return meta;
     }
     async start(req) {
+        const userKey = req.userKey || this.account.userKey;
         const request = {
-            userKey: req.userKey || this.account.userKey,
-            managerKey: req.managerKey || this.account.managerKey,
+            userKey,
+            managerKey: req.managerKey || userKey,
             master: req.master,
             slave: req.slave,
             riskType: req.riskType,

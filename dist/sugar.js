@@ -15,9 +15,8 @@ class CopierSugar {
         this.endpoint = endpoint;
         return this;
     }
-    withCredentials(userKey, managerKey) {
+    withCredentials(userKey) {
         this.req.userKey = userKey;
-        this.req.managerKey = managerKey || userKey;
         return this;
     }
     fromMaster(master) { this.req.master = master; return this; }
@@ -29,7 +28,7 @@ class CopierSugar {
     withCopyPendingOrders(val = true) { this.req.copyPendingOrders = val; return this; }
     withReverseCopy(val = true) { this.req.reverseCopy = val; return this; }
     async start() {
-        const svc = new client_1.CopierService(this.endpoint, { userKey: this.req.userKey, managerKey: this.req.managerKey });
+        const svc = new client_1.CopierService(this.endpoint, { userKey: this.req.userKey });
         return svc.start(this.req);
     }
 }

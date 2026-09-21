@@ -8,7 +8,7 @@ export declare class CopierService {
     constructor(endpoint: string | undefined, options: {
         userKey: string;
         managerKey?: string;
-    });
+    } | string);
     private getMetadata;
     start(req: StartRequest): Promise<StartReply>;
     list(userKey?: string): Promise<ListReply>;

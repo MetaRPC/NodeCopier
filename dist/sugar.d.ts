@@ -4,7 +4,7 @@ export declare class CopierSugar {
     private endpoint;
     static create(): CopierSugar;
     withEndpoint(endpoint: string): this;
-    withCredentials(userKey: string, managerKey?: string): this;
+    withCredentials(userKey: string): this;
     fromMaster(master: Account): this;
     toSlave(slave: Account): this;
     withLotMultiplier(val: number): this;

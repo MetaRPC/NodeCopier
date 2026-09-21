@@ -10,9 +10,10 @@ export class CopierService {
     public readonly endpoint: string;
     private grpcClient: any;
 
-    constructor(endpoint: string = 'copy.mrpc.pro:443', options: { userKey: string; managerKey?: string }) {
+    constructor(endpoint: string = 'copy.mrpc.pro:443', options: { userKey: string; managerKey?: string } | string) {
+        const userKey = typeof options === 'string' ? options : options.userKey;
         this.endpoint = endpoint;
-        this.account = new CopierAccount(endpoint, options.userKey, options.managerKey);
+        this.account = new CopierAccount(endpoint, userKey);
 
         const cleanEndpoint = endpoint.replace(/^https?:\/\//, '').replace(/^wss?:\/\//, '');
         const credentials = (cleanEndpoint.includes(':443') || cleanEndpoint.endsWith('443') || !cleanEndpoint.includes(':'))
@@ -34,17 +35,15 @@ export class CopierService {
     private getMetadata(): grpc.Metadata {
         const meta = new grpc.Metadata();
         meta.set('authorization', `Bearer ${this.account.userKey}`);
-        if (this.account.managerKey) {
-            meta.set('x-metarpc-manager', this.account.managerKey);
-        }
         meta.set('x-metarpc-client-sdk', 'NodeCopier/1.0.0');
         return meta;
     }
 
     async start(req: StartRequest): Promise<StartReply> {
+        const userKey = req.userKey || this.account.userKey;
         const request = {
-            userKey: req.userKey || this.account.userKey,
-            managerKey: req.managerKey || this.account.managerKey,
+            userKey,
+            managerKey: req.managerKey || userKey,
             master: req.master,
             slave: req.slave,
             riskType: req.riskType,

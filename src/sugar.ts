@@ -17,9 +17,8 @@ export class CopierSugar {
         return this;
     }
 
-    withCredentials(userKey: string, managerKey?: string) {
+    withCredentials(userKey: string) {
         this.req.userKey = userKey;
-        this.req.managerKey = managerKey || userKey;
         return this;
     }
 
@@ -33,7 +32,7 @@ export class CopierSugar {
     withReverseCopy(val: boolean = true) { this.req.reverseCopy = val; return this; }
 
     async start(): Promise<StartReply> {
-        const svc = new CopierService(this.endpoint, { userKey: this.req.userKey!, managerKey: this.req.managerKey });
+        const svc = new CopierService(this.endpoint, { userKey: this.req.userKey! });
         return svc.start(this.req as StartRequest);
     }
 }

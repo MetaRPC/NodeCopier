@@ -3,14 +3,13 @@ const assert = require('node:assert');
 const { CopierService, CopierAccount, CopierSugar, DemoAccountClient } = require('../dist/index.js');
 
 test('CopierAccount holds credentials and generates auth headers', () => {
-  const account = new CopierAccount('copy.mrpc.pro:443', 'usr_test_123', 'mgr_test_456');
+  const account = new CopierAccount('copy.mrpc.pro:443', 'usr_test_123');
   assert.strictEqual(account.endpoint, 'copy.mrpc.pro:443');
   assert.strictEqual(account.userKey, 'usr_test_123');
-  assert.strictEqual(account.managerKey, 'mgr_test_456');
 
   const meta = account.getAuthMetadata();
   assert.strictEqual(meta.authorization, 'Bearer usr_test_123');
-  assert.strictEqual(meta['x-metarpc-manager'], 'mgr_test_456');
+  assert.strictEqual(meta['x-metarpc-manager'], undefined);
 });
 
 test('CopierService instantiates and builds gRPC client', () => {
