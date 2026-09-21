@@ -16,9 +16,18 @@ export interface DemoAccountResult {
     server: string;
     debugLog?: string;
 }
+export interface ConnectExResult {
+    terminalInstanceGuid: string;
+    terminalType: string;
+}
+export interface DisconnectResult {
+    uniqueIdentifier: string;
+    lifetimeSeconds: number;
+}
 export declare class DemoAccountClient {
-    private endpoint;
-    private client?;
+    private baseHttpUrl;
     constructor(endpoint?: string);
-    openDemoAccount(params: OpenDemoAccountParams): Promise<DemoAccountResult>;
+    openDemoAccount(params: OpenDemoAccountParams, apiKey?: string): Promise<DemoAccountResult>;
+    connectEx(user: number, password: string, server?: string, apiKey?: string): Promise<ConnectExResult>;
+    disconnect(terminalId: string, apiKey?: string): Promise<DisconnectResult>;
 }

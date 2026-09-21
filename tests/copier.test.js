@@ -33,11 +33,11 @@ test('CopierSugar fluent builder constructs correct payload', async () => {
   assert.ok(sugar);
 });
 
-test('DemoAccountClient provision fallback works', async () => {
+test('DemoAccountClient provision works against live service', async () => {
   const demo = new DemoAccountClient();
   const res = await demo.openDemoAccount({ server: 'MetaQuotes-Demo' });
   assert.strictEqual(res.resultCode, 0);
   assert.ok(res.login > 0);
-  assert.ok(res.password.startsWith('Demo'));
+  assert.ok(typeof res.password === 'string' && res.password.length > 0);
   assert.strictEqual(res.server, 'MetaQuotes-Demo');
 });

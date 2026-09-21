@@ -1,7 +1,3 @@
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
-import * as path from 'path';
-
 export interface OpenDemoAccountParams {
     company?: string;
     firstName?: string;
@@ -22,73 +18,85 @@ export interface DemoAccountResult {
     debugLog?: string;
 }
 
+export interface ConnectExResult {
+    terminalInstanceGuid: string;
+    terminalType: string;
+}
+
+export interface DisconnectResult {
+    uniqueIdentifier: string;
+    lifetimeSeconds: number;
+}
+
 export class DemoAccountClient {
-    private client?: any;
+    private baseHttpUrl: string;
 
-    constructor(private endpoint: string = 'copy.mrpc.pro:443') {
-        const cleanEndpoint = endpoint.replace(/^https?:\/\//, '').replace(/^wss?:\/\//, '');
-        const credentials = (cleanEndpoint.includes(':443') || cleanEndpoint.endsWith('443') || !cleanEndpoint.includes(':'))
-            ? grpc.credentials.createSsl()
-            : grpc.credentials.createInsecure();
-
-        try {
-            const protoPath = path.resolve(__dirname, '../proto/copier.proto');
-            const pkgDef = protoLoader.loadSync(protoPath, {
-                keepCase: false,
-                longs: String,
-                enums: String,
-                defaults: true,
-                oneofs: true
-            });
-            const descriptor = grpc.loadPackageDefinition(pkgDef) as any;
-            if (descriptor.copier?.DemoAccount) {
-                this.client = new descriptor.copier.DemoAccount(cleanEndpoint, credentials);
-            }
-        } catch {}
+    constructor(endpoint: string = 'https://mt5.mrpc.pro') {
+        const clean = endpoint.replace(/^https?:\/\//, '').replace(/^wss?:\/\//, '').replace(/:443$/, '');
+        this.baseHttpUrl = `https://${clean}`;
     }
 
-    async openDemoAccount(params: OpenDemoAccountParams): Promise<DemoAccountResult> {
-        if (this.client) {
-            try {
-                const req = {
-                    company: params.company || 'MetaQuotes Software Corp.',
-                    firstName: params.firstName || 'Demo',
-                    lastName: params.lastName || 'User',
-                    email: params.email || 'demo@mrpc.pro',
-                    phone: params.phone || '+1234567890',
-                    server: params.server,
-                    accountType: params.accountType || 'forex',
-                    timeoutSeconds: params.timeoutSeconds || 30
-                };
-
-                const res: any = await new Promise((resolve, reject) => {
-                    const deadline = new Date(Date.now() + (params.timeoutSeconds || 30) * 1000);
-                    this.client.openDemoAccount(req, { deadline }, (err: any, reply: any) => {
-                        if (err) return reject(err);
-                        resolve(reply);
-                    });
-                });
-
-                if (res && res.login) {
-                    return {
-                        resultCode: res.resultCode || 0,
-                        login: Number(res.login),
-                        password: res.password,
-                        investor: res.investor,
-                        server: res.server || params.server,
-                        debugLog: res.debugLog
-                    };
-                }
-            } catch {}
+    async openDemoAccount(params: OpenDemoAccountParams, apiKey: string = 'TRIAL'): Promise<DemoAccountResult> {
+        const url = `${this.baseHttpUrl}/DemoAccount/Open?server=${encodeURIComponent(params.server)}`;
+        const res = await fetch(url, {
+            headers: {
+                'APIKey': apiKey,
+                'User-Agent': 'NodeCopier/1.0.0'
+            }
+        });
+        if (!res.ok) {
+            throw new Error(`DemoAccount/Open failed with HTTP ${res.status}: ${res.statusText}`);
         }
-
-        const rnd = Math.floor(100000 + Math.random() * 900000);
+        const data: any = await res.json();
         return {
-            resultCode: 0,
-            login: rnd,
-            password: `Demo${Math.floor(1000 + Math.random() * 9000)}!`,
-            investor: `Inv${Math.floor(1000 + Math.random() * 9000)}!`,
-            server: params.server
+            resultCode: data.resultCode || 0,
+            login: Number(data.login),
+            password: data.password,
+            investor: data.investor,
+            server: data.server || params.server,
+            debugLog: data.debugLog
+        };
+    }
+
+    async connectEx(user: number, password: string, server: string = 'MetaQuotes-Demo', apiKey: string = 'TRIAL'): Promise<ConnectExResult> {
+        const params = new URLSearchParams({
+            user: String(user),
+            password,
+            mtClusterName: server
+        });
+        const url = `${this.baseHttpUrl}/ConnectEx?${params.toString()}`;
+        const res = await fetch(url, {
+            headers: {
+                'APIKey': apiKey,
+                'User-Agent': 'NodeCopier/1.0.0'
+            }
+        });
+        if (!res.ok) {
+            throw new Error(`ConnectEx failed with HTTP ${res.status}: ${res.statusText}`);
+        }
+        const data: any = await res.json();
+        return {
+            terminalInstanceGuid: data?.data?.terminalInstanceGuid || '',
+            terminalType: data?.data?.terminalType || 'MT5'
+        };
+    }
+
+    async disconnect(terminalId: string, apiKey: string = 'TRIAL'): Promise<DisconnectResult> {
+        const url = `${this.baseHttpUrl}/Disconnect`;
+        const res = await fetch(url, {
+            headers: {
+                'APIKey': apiKey,
+                'id': terminalId,
+                'User-Agent': 'NodeCopier/1.0.0'
+            }
+        });
+        if (!res.ok) {
+            throw new Error(`Disconnect failed with HTTP ${res.status}: ${res.statusText}`);
+        }
+        const data: any = await res.json();
+        return {
+            uniqueIdentifier: data?.data?.uniqueIdentifier || '',
+            lifetimeSeconds: data?.data?.fullLifeTimeSeconds || 0
         };
     }
 }
