@@ -1,6 +1,6 @@
-import { CopierService, DemoAccountClient, toHyphenGuid } from '../src';
+const { CopierService, DemoAccountClient, toHyphenGuid } = require('../dist/index.js');
 
-async function sleep(ms: number) {
+async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -8,9 +8,9 @@ async function main() {
     console.log('=== NodeCopier Trade Replication Quick Start ===');
     const apiKey = process.argv[2] || process.env.MRPC_API_KEY || 'TRIAL';
     const demo = new DemoAccountClient('https://mt5.mrpc.pro');
-    let masterGuid: string | null = null;
-    let slaveGuid: string | null = null;
-    let copierId: string | null = null;
+    let masterGuid = null;
+    let slaveGuid = null;
+    let copierId = null;
     const copier = new CopierService('copy.mrpc.pro:443', { userKey: apiKey });
 
     try {
@@ -24,7 +24,7 @@ async function main() {
         console.log(`    Slave Account Provisioned:  #${slave.login} (Server: ${slave.server})`);
         await sleep(1000);
 
-        // 2. Connect terminals via ConnectEx with APIKey: TRIAL
+        // 2. Connect terminals via ConnectEx
         console.log(`\n[2] Connecting terminals via ConnectEx (APIKey: ${apiKey})...`);
         const connMaster = await demo.connectEx(master.login, master.password, master.server, apiKey);
         masterGuid = connMaster.terminalInstanceGuid;
@@ -77,7 +77,7 @@ async function main() {
         // 5. Confirm trade copied to Slave
         console.log('\n[5] Verifying replicated trade on Slave account...');
         let replicated = false;
-        let slaveTicket: number | null = null;
+        let slaveTicket = null;
         for (let attempt = 1; attempt <= 15; attempt++) {
             await sleep(2000);
             const positions = await demo.openedOrders(slaveGuid, apiKey);
@@ -130,7 +130,7 @@ async function main() {
             try {
                 const discM = await demo.disconnect(masterGuid, apiKey);
                 console.log(`    Master Terminal Cleanly Disconnected: ${discM.uniqueIdentifier} (Lifetime: ${discM.lifetimeSeconds}s)`);
-            } catch (e: any) {
+            } catch (e) {
                 console.log(`    Master disconnect error: ${e.message}`);
             }
         }
@@ -138,7 +138,7 @@ async function main() {
             try {
                 const discS = await demo.disconnect(slaveGuid, apiKey);
                 console.log(`    Slave Terminal Cleanly Disconnected:  ${discS.uniqueIdentifier} (Lifetime: ${discS.lifetimeSeconds}s)`);
-            } catch (e: any) {
+            } catch (e) {
                 console.log(`    Slave disconnect error: ${e.message}`);
             }
         }
