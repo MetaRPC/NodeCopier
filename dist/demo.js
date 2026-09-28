@@ -51,15 +51,18 @@ class DemoAccountClient {
             terminalType: data?.data?.terminalType || 'MT5'
         };
     }
-    async disconnect(terminalId, apiKey = 'TRIAL') {
-        const url = `${this.baseHttpUrl}/Disconnect`;
-        const res = await fetch(url, {
-            headers: {
-                'APIKey': apiKey,
-                'id': terminalId,
-                'User-Agent': 'NodeCopier/1.0.0'
-            }
-        });
+    async disconnect(terminalId, apiKey = 'TRIAL', deleteOnDisconnect = false) {
+        let url = `${this.baseHttpUrl}/Disconnect`;
+        if (deleteOnDisconnect) {
+            url += '?delete=true';
+        }
+        const headers = {
+            'APIKey': apiKey,
+            'id': terminalId,
+            'delete': deleteOnDisconnect ? 'true' : 'false',
+            'User-Agent': 'NodeCopier/1.0.0'
+        };
+        const res = await fetch(url, { headers });
         if (!res.ok) {
             throw new Error(`Disconnect failed with HTTP ${res.status}: ${res.statusText}`);
         }

@@ -128,7 +128,7 @@ async function main() {
         console.log('\n[9] Disconnecting terminal sessions cleanly via /Disconnect...');
         if (masterGuid) {
             try {
-                const discM = await demo.disconnect(masterGuid, apiKey);
+                const discM = await demo.disconnect(masterGuid, apiKey, true);
                 console.log(`    Master Terminal Cleanly Disconnected: ${discM.uniqueIdentifier} (Lifetime: ${discM.lifetimeSeconds}s)`);
             } catch (e: any) {
                 console.log(`    Master disconnect error: ${e.message}`);
@@ -136,7 +136,7 @@ async function main() {
         }
         if (slaveGuid) {
             try {
-                const discS = await demo.disconnect(slaveGuid, apiKey);
+                const discS = await demo.disconnect(slaveGuid, apiKey, true);
                 console.log(`    Slave Terminal Cleanly Disconnected:  ${discS.uniqueIdentifier} (Lifetime: ${discS.lifetimeSeconds}s)`);
             } catch (e: any) {
                 console.log(`    Slave disconnect error: ${e.message}`);

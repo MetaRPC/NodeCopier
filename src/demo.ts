@@ -81,15 +81,18 @@ export class DemoAccountClient {
         };
     }
 
-    async disconnect(terminalId: string, apiKey: string = 'TRIAL'): Promise<DisconnectResult> {
-        const url = `${this.baseHttpUrl}/Disconnect`;
-        const res = await fetch(url, {
-            headers: {
-                'APIKey': apiKey,
-                'id': terminalId,
-                'User-Agent': 'NodeCopier/1.0.0'
-            }
-        });
+    async disconnect(terminalId: string, apiKey: string = 'TRIAL', deleteOnDisconnect: boolean = false): Promise<DisconnectResult> {
+        let url = `${this.baseHttpUrl}/Disconnect`;
+        if (deleteOnDisconnect) {
+            url += '?delete=true';
+        }
+        const headers: Record<string, string> = {
+            'APIKey': apiKey,
+            'id': terminalId,
+            'delete': deleteOnDisconnect ? 'true' : 'false',
+            'User-Agent': 'NodeCopier/1.0.0'
+        };
+        const res = await fetch(url, { headers });
         if (!res.ok) {
             throw new Error(`Disconnect failed with HTTP ${res.status}: ${res.statusText}`);
         }
