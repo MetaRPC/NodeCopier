@@ -4,10 +4,10 @@ Welcome to **NodeCopier**, the official Node.js client library for MetaRPC's ult
 
 ## Installation
 
-Install NodeCopier using your language's package manager:
+NodeCopier is not published on npm; install it as follows:
 
 ```bash
-npm install @metarpc/nodecopier
+npm install github:MetaRPC/NodeCopier @grpc/grpc-js
 ```
 
 ## Infrastructure Endpoints

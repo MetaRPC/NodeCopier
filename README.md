@@ -8,7 +8,7 @@ Official Node.js SDK for the MetaRPC Trade Copier high-performance trade replica
 ## Installation
 
 ```bash
-npm install @metarpc/nodecopier
+npm install github:MetaRPC/NodeCopier @grpc/grpc-js
 ```
 
 ## 🏃 How to Run Examples
