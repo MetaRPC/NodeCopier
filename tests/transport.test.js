@@ -32,6 +32,14 @@ test('every RPC sends ApiKey, owner identity and a deadline; errors remain failu
     assert.equal(calls[0][1].managerKey,'manager-test');
     assert.equal(calls[0][1].copySl,false);assert.equal(calls[0][1].copyTp,true);
     assert.equal(calls[2][1].paused,false);
+    const provider = (type, id) => ({type, id, user:'123', password:'', server:`${type}-demo`});
+    const ctId = '0123456789abcdef0123456789abcdef';
+    const tlId = 'fedcba9876543210fedcba9876543210';
+    assert.equal((await service.start({master:provider('CT',ctId),slave:provider('TL',tlId),riskType:'FixedLot',riskValue:'0.01'})).ok,true);
+    assert.equal(calls[4][1].master.type,'CT');
+    assert.equal(calls[4][1].slave.type,'TL');
+    assert.equal(calls[4][1].master.id,ctId);
+    assert.equal(calls[4][1].slave.id,tlId);
   } finally { service.close();server.forceShutdown(); }
 });
 
@@ -53,4 +61,23 @@ test('WebSocket authenticates at the configured host and preserves real messages
 
 test('invalid owner keys are rejected before connection',()=>{
   for(const key of ['', 'TRIAL','trial','x\r\nInjected: yes','has space']) assert.throws(()=>new CopierAccount('copy.mrpc.pro',key));
+});
+
+test('WebSocket keeps unquoted 64-bit broker tickets exact at every nesting level',async()=>{
+  const server = new WebSocketServer({port:0});
+  await new Promise(resolve=>server.on('listening',resolve));
+  server.on('connection',ws=>ws.send('{"masterOrder":{"ticket":432345564230835570,"lots":0.01},"slaveTicket":9007199254740993,"negative":-9007199254740993,"safe":9007199254740991,"success":true,"comment":"ticket 432345564230835570"}'));
+  const service = new CopierService(`http://127.0.0.1:${server.address().port}`, 'owner-test');
+  let stream;
+  try {
+    const result=await new Promise((resolve,reject)=>{stream=service.streamTradeLogs('test',resolve,reject);});
+    assert.equal(result.masterOrder.ticket,'432345564230835570');
+    assert.equal(result.slaveTicket,'9007199254740993');
+    assert.equal(result.negative,'-9007199254740993');
+    assert.equal(result.safe,9007199254740991);
+    assert.equal(result.masterOrder.lots,0.01);
+    assert.equal(result.success,true);
+    assert.equal(result.comment,'ticket 432345564230835570');
+    assert.equal(JSON.parse(JSON.stringify(result)).masterOrder.ticket,'432345564230835570');
+  } finally { if(stream)stream.ws.terminate();service.close();await new Promise(resolve=>server.close(resolve)); }
 });

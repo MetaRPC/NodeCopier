@@ -2,6 +2,7 @@ import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import * as path from 'path';
 import WebSocket from 'ws';
+import { parse as parseLosslessJson } from 'lossless-json';
 import { Account, StartRequest, StartReply, ListReply, SimpleReply, TradeLog } from './models';
 import { CopierAccount } from './account';
 
@@ -168,7 +169,15 @@ export class CopierService {
         ws.on('message', (data: WebSocket.Data) => {
             try {
                 const text = data.toString();
-                const log = JSON.parse(text) as TradeLog;
+                // Broker tickets can exceed JavaScript's exact integer range.
+                // Keep those values as strings, including nested order tickets;
+                // retain numbers for ordinary volumes, prices and counters.
+                const log = parseLosslessJson(text, undefined, {
+                    parseNumber: (value: string) => {
+                        const number = Number(value);
+                        return /^-?\d+$/.test(value) && !Number.isSafeInteger(number) ? value : number;
+                    }
+                }) as TradeLog;
                 onMessage(log);
             } catch (e) {
                 if (onError) onError(e as Error);

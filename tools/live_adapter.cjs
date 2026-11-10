@@ -3,12 +3,12 @@ const {CopierService}=require('../dist');
 const fs=require('node:fs');
 const v=fs.readFileSync(0,'utf8').trimEnd().split(/\r?\n/);
 (async()=>{
- const platform=process.env.COPIER_PLATFORM||'MT5';
- if(!['MT4','MT5'].includes(platform))throw new Error('COPIER_PLATFORM must be MT4 or MT5');
+ const platforms={2:process.env.COPIER_MASTER_PLATFORM||process.env.COPIER_PLATFORM||'MT5',6:process.env.COPIER_SLAVE_PLATFORM||process.env.COPIER_PLATFORM||'MT5'};
+ if(Object.values(platforms).some(p=>!['MT4','MT5','CT','TL'].includes(p)))throw new Error('Copier platform must be MT4, MT5, CT or TL');
  const c=new CopierService(v[0],{userKey:v[1]});
  try {
   const op=process.argv[2];let r;
-  const account=i=>({type:platform,user:v[i],password:v[i+1],server:v[i+2],id:v[i+3]});
+  const account=i=>({type:platforms[i],user:v[i],password:v[i+1],server:v[i+2],id:v[i+3]});
   if(op==='start')r=await c.start({master:account(2),slave:account(6),riskType:v[10],riskValue:v[11],fixedMasterBalance:v[12]||'',copySl:true,copyTp:true});
   else if(op==='stream'){
    await new Promise((resolve,reject)=>{

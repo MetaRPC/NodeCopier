@@ -41,6 +41,7 @@ const grpc = __importStar(require("@grpc/grpc-js"));
 const protoLoader = __importStar(require("@grpc/proto-loader"));
 const path = __importStar(require("path"));
 const ws_1 = __importDefault(require("ws"));
+const lossless_json_1 = require("lossless-json");
 const account_1 = require("./account");
 class CopierService {
     account;
@@ -186,7 +187,15 @@ class CopierService {
         ws.on('message', (data) => {
             try {
                 const text = data.toString();
-                const log = JSON.parse(text);
+                // Broker tickets can exceed JavaScript's exact integer range.
+                // Keep those values as strings, including nested order tickets;
+                // retain numbers for ordinary volumes, prices and counters.
+                const log = (0, lossless_json_1.parse)(text, undefined, {
+                    parseNumber: (value) => {
+                        const number = Number(value);
+                        return /^-?\d+$/.test(value) && !Number.isSafeInteger(number) ? value : number;
+                    }
+                });
                 onMessage(log);
             }
             catch (e) {

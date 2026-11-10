@@ -4,6 +4,14 @@ Connect to `wss://copy.mrpc.pro/OnTradeLog?id=<copier-id>` with the owner's `Api
 
 The real payload includes timing, success/failure and nested orders. Fields can include `masterOrder`, `slaveOrder`, `slaveSymbol`, `slaveTicket`, `exceptionCode` and `exceptionMessage`. Do not assume a flat event with top-level `symbol` and numeric tickets. Preserve raw JSON for diagnostics and redact it before sharing.
 
+## Exact broker tickets in Node.js
+
+The streaming helper preserves JSON integers outside JavaScript's safe integer range as strings, including nested `masterOrder.ticket` and `slaveOrder.ticket`. Ordinary numeric volumes, prices and counters remain numbers. This matters for TradeLocker tickets such as `432345564230835570`: native `JSON.parse` rounds that value and breaks ticket matching. Do not convert a returned ticket string to `Number`; keep it as a string or use `BigInt` for integer arithmetic. The gRPC loader also keeps 64-bit values as strings.
+
+The parser regression sends an unquoted 64-bit ticket through a real local WebSocket and checks that it survives parsing and JSON serialization without changing digits.
+
+`TradeLog` exposes optional `masterOrder` and `slaveOrder` objects. Read `log.masterOrder?.ticket` and `log.slaveOrder?.ticket` (or `log.slaveTicket`) and handle missing orders on failed operations. Legacy flat `symbol`, `masterTicket` and `profit` fields are optional; the type definitions no longer promise fields the stream may omit.
+
 ## Consume correctly
 
 - Assemble fragmented messages before parsing.

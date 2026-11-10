@@ -1,5 +1,6 @@
+export type AccountType = 'MT4' | 'MT5' | 'MT4_MTAPI' | 'MT5_MTAPI' | 'MT4_MRPC' | 'MT5_MRPC' | 'CT' | 'TL';
 export interface Account {
-    type: 'MT4' | 'MT5';
+    type: AccountType;
     user: number | string;
     password: string;
     server: string;
@@ -46,13 +47,26 @@ export interface SimpleReply {
     ok: boolean;
     error?: string;
 }
+export interface TradeLogOrder {
+    ticket?: number | string;
+    symbol?: string;
+    lots?: number | string;
+    type?: number | string;
+    [field: string]: unknown;
+}
 export interface TradeLog {
     id: string;
     copierId: string;
-    symbol: string;
+    symbol?: string;
     updateType: string;
-    masterTicket: number | string;
-    slaveTicket: number | string;
-    profit: number;
+    masterTicket?: number | string;
+    slaveTicket?: number | string;
+    masterOrder?: TradeLogOrder | null;
+    slaveOrder?: TradeLogOrder | null;
+    slaveSymbol?: string;
+    profit?: number | string;
     success: boolean;
+    exceptionCode?: string | null;
+    exceptionMessage?: string | null;
+    [field: string]: unknown;
 }
