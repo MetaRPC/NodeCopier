@@ -2,6 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DemoAccountClient = void 0;
 exports.toHyphenGuid = toHyphenGuid;
+async function readReply(response) {
+    const data = await response.json();
+    if (data?.error)
+        throw new Error(`MRPC request failed: ${data.error.errorCode || 'API_ERROR'}`);
+    return data;
+}
 class DemoAccountClient {
     baseHttpUrl;
     constructor(endpoint = 'https://mt5.mrpc.pro') {
@@ -19,7 +25,7 @@ class DemoAccountClient {
         if (!res.ok) {
             throw new Error(`DemoAccount/Open failed with HTTP ${res.status}: ${res.statusText}`);
         }
-        const data = await res.json();
+        const data = await readReply(res);
         return {
             resultCode: data.resultCode || 0,
             login: Number(data.login),
@@ -45,7 +51,7 @@ class DemoAccountClient {
         if (!res.ok) {
             throw new Error(`ConnectEx failed with HTTP ${res.status}: ${res.statusText}`);
         }
-        const data = await res.json();
+        const data = await readReply(res);
         return {
             terminalInstanceGuid: data?.data?.terminalInstanceGuid || '',
             terminalType: data?.data?.terminalType || 'MT5'
@@ -66,7 +72,7 @@ class DemoAccountClient {
         if (!res.ok) {
             throw new Error(`Disconnect failed with HTTP ${res.status}: ${res.statusText}`);
         }
-        const data = await res.json();
+        const data = await readReply(res);
         return {
             uniqueIdentifier: data?.data?.uniqueIdentifier || '',
             lifetimeSeconds: data?.data?.fullLifeTimeSeconds || 0
@@ -89,7 +95,7 @@ class DemoAccountClient {
         });
         if (!res.ok)
             throw new Error(`OrderSend failed: HTTP ${res.status}`);
-        return await res.json();
+        return await readReply(res);
     }
     async openedOrders(terminalId, apiKey = 'TRIAL') {
         const url = `${this.baseHttpUrl}/OpenedOrders?id=${encodeURIComponent(terminalId)}`;
@@ -102,7 +108,7 @@ class DemoAccountClient {
         });
         if (!res.ok)
             throw new Error(`OpenedOrders failed: HTTP ${res.status}`);
-        const data = await res.json();
+        const data = await readReply(res);
         return data?.data?.positionInfos || [];
     }
     async orderClose(terminalId, ticket, apiKey = 'TRIAL') {
@@ -122,7 +128,7 @@ class DemoAccountClient {
         });
         if (!res.ok)
             throw new Error(`OrderClose failed: HTTP ${res.status}`);
-        return await res.json();
+        return await readReply(res);
     }
 }
 exports.DemoAccountClient = DemoAccountClient;

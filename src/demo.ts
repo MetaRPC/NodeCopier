@@ -1,3 +1,9 @@
+async function readReply(response: Response): Promise<any> {
+    const data: any = await response.json();
+    if (data?.error) throw new Error(`MRPC request failed: ${data.error.errorCode || 'API_ERROR'}`);
+    return data;
+}
+
 export interface OpenDemoAccountParams {
     company?: string;
     firstName?: string;
@@ -47,7 +53,7 @@ export class DemoAccountClient {
         if (!res.ok) {
             throw new Error(`DemoAccount/Open failed with HTTP ${res.status}: ${res.statusText}`);
         }
-        const data: any = await res.json();
+        const data: any = await readReply(res);
         return {
             resultCode: data.resultCode || 0,
             login: Number(data.login),
@@ -74,7 +80,7 @@ export class DemoAccountClient {
         if (!res.ok) {
             throw new Error(`ConnectEx failed with HTTP ${res.status}: ${res.statusText}`);
         }
-        const data: any = await res.json();
+        const data: any = await readReply(res);
         return {
             terminalInstanceGuid: data?.data?.terminalInstanceGuid || '',
             terminalType: data?.data?.terminalType || 'MT5'
@@ -96,7 +102,7 @@ export class DemoAccountClient {
         if (!res.ok) {
             throw new Error(`Disconnect failed with HTTP ${res.status}: ${res.statusText}`);
         }
-        const data: any = await res.json();
+        const data: any = await readReply(res);
         return {
             uniqueIdentifier: data?.data?.uniqueIdentifier || '',
             lifetimeSeconds: data?.data?.fullLifeTimeSeconds || 0
@@ -119,7 +125,7 @@ export class DemoAccountClient {
             }
         });
         if (!res.ok) throw new Error(`OrderSend failed: HTTP ${res.status}`);
-        return await res.json();
+        return await readReply(res);
     }
 
     async openedOrders(terminalId: string, apiKey: string = 'TRIAL'): Promise<any[]> {
@@ -132,7 +138,7 @@ export class DemoAccountClient {
             }
         });
         if (!res.ok) throw new Error(`OpenedOrders failed: HTTP ${res.status}`);
-        const data: any = await res.json();
+        const data: any = await readReply(res);
         return data?.data?.positionInfos || [];
     }
 
@@ -152,7 +158,7 @@ export class DemoAccountClient {
             }
         });
         if (!res.ok) throw new Error(`OrderClose failed: HTTP ${res.status}`);
-        return await res.json();
+        return await readReply(res);
     }
 }
 
