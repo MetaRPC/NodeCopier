@@ -33,6 +33,6 @@ export class CopierSugar {
 
     async start(): Promise<StartReply> {
         const svc = new CopierService(this.endpoint, { userKey: this.req.userKey! });
-        return svc.start(this.req as StartRequest);
+        try { return await svc.start(this.req as StartRequest); } finally { svc.close(); }
     }
 }

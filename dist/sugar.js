@@ -29,7 +29,12 @@ class CopierSugar {
     withReverseCopy(val = true) { this.req.reverseCopy = val; return this; }
     async start() {
         const svc = new client_1.CopierService(this.endpoint, { userKey: this.req.userKey });
-        return svc.start(this.req);
+        try {
+            return await svc.start(this.req);
+        }
+        finally {
+            svc.close();
+        }
     }
 }
 exports.CopierSugar = CopierSugar;

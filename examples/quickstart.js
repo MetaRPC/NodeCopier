@@ -5,8 +5,9 @@ async function sleep(ms) {
 }
 
 async function main() {
+    if (process.env.MRPC_LIVE_TESTS !== '1') throw new Error('This example places demo trades. Set MRPC_LIVE_TESTS=1 explicitly.');
     console.log('=== NodeCopier Trade Replication Quick Start ===');
-    const apiKey = process.argv[2] || process.env.MRPC_API_KEY || 'TRIAL';
+    const apiKey = process.argv[2] || process.env.MRPC_API_KEY || '';
     const demo = new DemoAccountClient('https://mt5.mrpc.pro');
     let masterGuid = null;
     let slaveGuid = null;
@@ -25,7 +26,7 @@ async function main() {
         await sleep(1000);
 
         // 2. Connect terminals via ConnectEx
-        console.log(`\n[2] Connecting terminals via ConnectEx (APIKey: ${apiKey})...`);
+        console.log(`\n[2] Connecting terminals via ConnectEx (authenticated)...`);
         const connMaster = await demo.connectEx(master.login, master.password, master.server, apiKey);
         masterGuid = connMaster.terminalInstanceGuid;
         console.log(`    Master Terminal Connected! GUID: ${masterGuid}`);

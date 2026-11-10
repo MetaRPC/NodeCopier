@@ -5,6 +5,7 @@ export declare class CopierService {
     readonly account: CopierAccount;
     readonly endpoint: string;
     private grpcClient;
+    private readonly managerKey;
     constructor(endpoint: string | undefined, options: {
         userKey: string;
         managerKey?: string;

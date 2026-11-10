@@ -1,36 +1,37 @@
-# NodeCopier
+# MetaRPC Node.js / TypeScript Trade Copier SDK
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Docs](https://img.shields.io/badge/docs-online-green.svg)](https://github.com/MetaRPC/NodeCopier/tree/main/docs)
+Authenticate, configure a master–follower relationship, inspect its state, pause and remove it.
 
-Official Node.js SDK for the MetaRPC Trade Copier high-performance trade replication engine via gRPC (`copy.mrpc.pro:443`).
+**[Documentation](https://metarpc.github.io/NodeCopier/) · [Quickstart](https://metarpc.github.io/NodeCopier/quickstart/) · [Authentication](https://metarpc.github.io/NodeCopier/authentication/) · [API reference](https://metarpc.github.io/NodeCopier/reference/)**
 
-## Installation
+## Install from source
 
-```bash
-npm install github:MetaRPC/NodeCopier @grpc/grpc-js
-```
-
-## 🏃 How to Run Examples
-
-Clone the repository and run the trade copier example out-of-the-box:
+Requires Node.js 20+ and npm.
 
 ```bash
 git clone https://github.com/MetaRPC/NodeCopier.git
 cd NodeCopier
-npm install
-
-# 1. Run with default TRIAL key:
-node examples/quickstart.js
-
-# 2. Or pass your MetaRPC API key directly as an argument:
-node examples/quickstart.js your_api_key_here
-
-# 3. Or use the MRPC_API_KEY environment variable:
-export MRPC_API_KEY="your_api_key_here"        # Windows CMD: set MRPC_API_KEY=your_api_key_here
-node examples/quickstart.js                    # Windows PowerShell: $env:MRPC_API_KEY="your_api_key_here"
+npm ci
+npm run build
+npm test
 ```
 
-## Quick Start
+## First request
 
-See [Quick Start Documentation](https://github.com/MetaRPC/NodeCopier/blob/main/docs/All_Guides/Your_First_Project.md) for a 10-minute walkthrough.
+Set `MRPC_API_KEY` to your real owner API key in your environment, then run:
+
+```bash
+node examples/list.js
+```
+
+This List example is read-only: no account creation or trades. Java on Windows uses `;` instead of `:` in classpaths.
+
+## Authentication
+
+Every SDK call sends `ApiKey` (`apikey` in gRPC metadata). The gRPC body also carries `user_key`; the header does not replace it. `TRIAL` is not an owner key. Read the [verified transport contract](https://metarpc.github.io/NodeCopier/authentication/).
+
+## Scope and verification
+
+Core operations: start · list · pause · remove. Advanced server features are distinguished from the supported wrapper surface. Review legacy replication examples before using them with disposable demos. Standard tests need no broker credentials.
+
+See [testing and contributing](https://metarpc.github.io/NodeCopier/testing/) for the regression suite, demo checklist and Pages build. Edit `docs/`; generated `site/` output is not source.

@@ -8,7 +8,7 @@ test('CopierAccount holds credentials and generates auth headers', () => {
   assert.strictEqual(account.userKey, 'usr_test_123');
 
   const meta = account.getAuthMetadata();
-  assert.strictEqual(meta.authorization, 'Bearer usr_test_123');
+  assert.strictEqual(meta.apikey, 'usr_test_123');
   assert.strictEqual(meta['x-metarpc-manager'], undefined);
 });
 
@@ -33,9 +33,9 @@ test('CopierSugar fluent builder constructs correct payload', async () => {
   assert.ok(sugar);
 });
 
-test('DemoAccountClient provision works against live service', async () => {
+test('DemoAccountClient provision works against live service', { skip: process.env.MRPC_LIVE_TESTS !== '1' }, async () => {
   const demo = new DemoAccountClient();
-  const res = await demo.openDemoAccount({ server: 'MetaQuotes-Demo' });
+  const res = await demo.openDemoAccount({ server: 'MetaQuotes-Demo' }, process.env.MRPC_API_KEY);
   assert.strictEqual(res.resultCode, 0);
   assert.ok(res.login > 0);
   assert.ok(typeof res.password === 'string' && res.password.length > 0);

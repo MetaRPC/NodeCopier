@@ -9,14 +9,16 @@ export class CopierService {
     public readonly account: CopierAccount;
     public readonly endpoint: string;
     private grpcClient: any;
+    private readonly managerKey: string;
 
     constructor(endpoint: string = 'copy.mrpc.pro:443', options: { userKey: string; managerKey?: string } | string) {
         const userKey = typeof options === 'string' ? options : options.userKey;
         this.endpoint = endpoint;
+        this.managerKey = typeof options === 'string' ? userKey : (options.managerKey || userKey);
         this.account = new CopierAccount(endpoint, userKey);
 
         const cleanEndpoint = endpoint.replace(/^https?:\/\//, '').replace(/^wss?:\/\//, '');
-        const credentials = (cleanEndpoint.includes(':443') || cleanEndpoint.endsWith('443') || !cleanEndpoint.includes(':'))
+        const credentials = (!/^(http|ws):\/\//.test(endpoint))
             ? grpc.credentials.createSsl()
             : grpc.credentials.createInsecure();
 
@@ -34,7 +36,7 @@ export class CopierService {
 
     private getMetadata(): grpc.Metadata {
         const meta = new grpc.Metadata();
-        meta.set('authorization', `Bearer ${this.account.userKey}`);
+        meta.set('apikey', this.account.userKey);
         meta.set('x-metarpc-client-sdk', 'NodeCopier/1.0.0');
         return meta;
     }
@@ -43,7 +45,7 @@ export class CopierService {
         const userKey = req.userKey || this.account.userKey;
         const request = {
             userKey,
-            managerKey: req.managerKey || userKey,
+            managerKey: req.managerKey || this.managerKey,
             master: req.master,
             slave: req.slave,
             riskType: req.riskType,
@@ -57,7 +59,7 @@ export class CopierService {
 
         return new Promise<StartReply>((resolve) => {
             const meta = this.getMetadata();
-            const deadline = new Date(Date.now() + 60000);
+            const deadline = new Date(Date.now() + 180000);
             this.grpcClient.start(request, meta, { deadline }, (err: any, response: any) => {
                 if (err) {
                     return resolve({
@@ -155,7 +157,7 @@ export class CopierService {
         onError?: (err: Error) => void
     ): { ws: WebSocket; close: () => void } {
         const cleanEndpoint = this.endpoint.replace(/^https?:\/\//, '').replace(/^wss?:\/\//, '');
-        const isSecure = cleanEndpoint.includes(':443') || cleanEndpoint.endsWith('443') || !cleanEndpoint.includes(':');
+        const isSecure = !/^(http|ws):\/\//.test(this.endpoint);
         const proto = isSecure ? 'wss' : 'ws';
         const url = `${proto}://${cleanEndpoint}/OnTradeLog?id=${encodeURIComponent(copierId)}`;
 

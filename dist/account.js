@@ -7,10 +7,13 @@ class CopierAccount {
     constructor(endpoint, userKey) {
         this.endpoint = endpoint;
         this.userKey = userKey;
+        if (!userKey || !/^[\x21-\x7e]+$/.test(userKey) || userKey.toUpperCase() === 'TRIAL') {
+            throw new Error('A real owner API key is required (printable ASCII, no whitespace).');
+        }
     }
     getAuthMetadata() {
         return {
-            authorization: `Bearer ${this.userKey}`,
+            apikey: this.userKey,
             'x-metarpc-client-sdk': 'NodeCopier/1.0.0'
         };
     }

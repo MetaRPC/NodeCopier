@@ -1,13 +1,13 @@
 export interface Account {
     type: 'MT4' | 'MT5';
-    user: number;
+    user: number | string;
     password: string;
     server: string;
     name?: string;
     id?: string;
 }
 export interface StartRequest {
-    userKey: string;
+    userKey?: string;
     managerKey?: string;
     master: Account;
     slave: Account;
@@ -27,10 +27,10 @@ export interface StartReply {
 export interface CopierSummary {
     id: string;
     masterType: string;
-    masterUser: number;
+    masterUser: number | string;
     masterServer: string;
     slaveType: string;
-    slaveUser: number;
+    slaveUser: number | string;
     slaveServer: string;
     riskType: string;
     riskValue: string;
@@ -51,8 +51,8 @@ export interface TradeLog {
     copierId: string;
     symbol: string;
     updateType: string;
-    masterTicket: number;
-    slaveTicket: number;
+    masterTicket: number | string;
+    slaveTicket: number | string;
     profit: number;
     success: boolean;
 }
