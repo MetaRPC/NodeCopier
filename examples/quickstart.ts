@@ -25,7 +25,7 @@ async function main() {
         console.log(`    Slave Account Provisioned:  #${slave.login} (Server: ${slave.server})`);
         await sleep(1000);
 
-        // 2. Connect terminals via ConnectEx with APIKey: TRIAL
+        // 2. Connect terminals via ConnectEx with the owner's API key.
         console.log(`\n[2] Connecting terminals via ConnectEx (authenticated)...`);
         const connMaster = await demo.connectEx(master.login, master.password, master.server, apiKey);
         masterGuid = connMaster.terminalInstanceGuid;
