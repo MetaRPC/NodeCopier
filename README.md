@@ -24,7 +24,7 @@ Set `MRPC_API_KEY` to your real owner API key in your environment, then run:
 node examples/list.js
 ```
 
-This List example is read-only: no account creation or trades. Java on Windows uses `;` instead of `:` in classpaths.
+This List example is read-only: no account creation or trades. 
 
 ## Authentication
 

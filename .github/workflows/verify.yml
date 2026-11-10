@@ -20,6 +20,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
+      - run: npx tsc --noEmit --target ES2022 --module commonjs --skipLibCheck examples/quickstart.ts
       - run: npm pack --dry-run
 
   docs:
